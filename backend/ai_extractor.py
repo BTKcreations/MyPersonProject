@@ -10,7 +10,8 @@ def extract_portfolio_data(text: str):
     Relies on litellm to abstract away the specific provider (OpenAI, Gemini, etc.)
     configured via environment variables.
     """
-    model = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
+    model = os.getenv("LLM_MODEL", "ollama/llama3")
+    api_base = os.getenv("OLLAMA_API_BASE", "http://localhost:11434")
 
     prompt = f"""
     You are an AI assistant that extracts portfolio data from resumes and professional documents.
@@ -46,11 +47,16 @@ def extract_portfolio_data(text: str):
     """
 
     try:
-        response = litellm.completion(
-            model=model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1
-        )
+        kwargs = {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.1
+        }
+
+        if model.startswith("ollama/"):
+            kwargs["api_base"] = api_base
+
+        response = litellm.completion(**kwargs)
         content = response.choices[0].message.content.strip()
 
         # Handle case where LLM still includes markdown formatting
