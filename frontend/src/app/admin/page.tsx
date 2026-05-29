@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { uploadDocument } from '../../lib/api';
 import { UploadCloud, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { ThemeToggle } from '../../components/theme-toggle';
 
 export default function AdminPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -33,61 +36,72 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-md p-8">
-        <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Admin Dashboard</h1>
+    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 selection:bg-primary selection:text-primary-foreground">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
 
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Upload Profile Document (PDF, TXT, MD)
-          </label>
-          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-500 transition-colors">
-            <div className="space-y-1 text-center">
-              <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
-              <div className="flex text-sm text-gray-600">
-                <label
-                  htmlFor="file-upload"
-                  className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                >
-                  <span>Upload a file</span>
-                  <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.txt,.md" />
-                </label>
-                <p className="pl-1">or drag and drop</p>
+      <Card className="max-w-md w-full">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Admin Dashboard</CardTitle>
+          <CardDescription>
+            Upload a document and let the AI extract your profile and project data.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">
+              Profile Document
+            </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 transition-all">
+              <div className="space-y-1 text-center">
+                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                <div className="flex text-sm">
+                  <label
+                    htmlFor="file-upload"
+                    className="relative cursor-pointer rounded-md font-medium text-primary hover:underline focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
+                  >
+                    <span>Upload a file</span>
+                    <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.txt,.md" />
+                  </label>
+                  <p className="pl-1 text-muted-foreground">or drag and drop</p>
+                </div>
+                <p className="text-xs text-muted-foreground">{file ? file.name : "PDF, TXT, MD up to 10MB"}</p>
               </div>
-              <p className="text-xs text-gray-500">{file ? file.name : "PDF, TXT, MD up to 10MB"}</p>
             </div>
           </div>
-        </div>
 
-        <button
-          onClick={handleUpload}
-          disabled={!file || status === 'uploading'}
-          className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
-        >
-          {status === 'uploading' ? (
-            <>
-              <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-              Processing AI...
-            </>
-          ) : (
-            'Extract & Save Profile Data'
+          <Button
+            onClick={handleUpload}
+            disabled={!file || status === 'uploading'}
+            className="w-full"
+          >
+            {status === 'uploading' ? (
+              <>
+                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                Processing AI...
+              </>
+            ) : (
+              'Extract & Save Profile Data'
+            )}
+          </Button>
+
+          {status === 'success' && (
+            <div className="mt-6 p-3 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-md flex items-center">
+              <CheckCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+              <span className="text-sm">{message}</span>
+            </div>
           )}
-        </button>
 
-        {status === 'success' && (
-          <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-md flex items-center">
-            <CheckCircle className="h-5 w-5 mr-2" />
-            <span className="text-sm">{message}</span>
-          </div>
-        )}
-
-        {status === 'error' && (
-          <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-md flex items-center">
-            <AlertCircle className="h-5 w-5 mr-2" />
-            <span className="text-sm">{message}</span>
-          </div>
-        )}
-      </div>
+          {status === 'error' && (
+            <div className="mt-6 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md flex items-center">
+              <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+              <span className="text-sm">{message}</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
