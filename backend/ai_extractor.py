@@ -50,11 +50,19 @@ def extract_portfolio_data(text: str):
         kwargs = {
             "model": model,
             "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.1
+            "temperature": 0.1,
+            "max_tokens": 2000
         }
 
+        # Ensure litellm routing bypasses OpenAI validation for Ollama
         if model.startswith("ollama/"):
             kwargs["api_base"] = api_base
+            kwargs["custom_llm_provider"] = "ollama"
+
+            # Since OpenAI key might be in the environment globally, we pop it locally
+            # if we explicitly want Ollama, so litellm doesn't get confused.
+            if "OPENAI_API_KEY" in os.environ:
+                kwargs["api_key"] = "dummy" # litellm sometimes still demands a non-empty key for parsing
 
         response = litellm.completion(**kwargs)
         content = response.choices[0].message.content.strip()
