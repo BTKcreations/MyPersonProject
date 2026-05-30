@@ -23,4 +23,9 @@ export const uploadDocument = async (file: File) => {
   return response.data;
 };
 
+export const chatWithAI = async (message: string) => {
+  const response = await api.post('/api/chat', { message });
+  return response.data;
+};
+
 export default api;

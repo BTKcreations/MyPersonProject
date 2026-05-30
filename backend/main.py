@@ -11,7 +11,12 @@ from fastapi import UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from document_parser import parse_document
 from ai_extractor import extract_portfolio_data
+from ai_chat import generate_chat_response
+from pydantic import BaseModel
 import json
+
+class ChatRequest(BaseModel):
+    message: str
 
 app.add_middleware(
     CORSMiddleware,
@@ -95,3 +100,8 @@ def get_portfolio(db: Session = Depends(get_db)):
         "skills": skills,
         "projects": projects
     }
+
+@app.post("/api/chat")
+def chat(request: ChatRequest, db: Session = Depends(get_db)):
+    response_text = generate_chat_response(db, request.message)
+    return {"reply": response_text}
